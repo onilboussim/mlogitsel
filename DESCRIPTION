@@ -1,0 +1,16 @@
+Package: mlogitsel
+Type: Package
+Title: Multinomial Logit Model with Sample Selection
+Version: 0.1.0
+Authors@R: person("Your", "Name", email = "your.email@example.com", role = c("aut", "cre"))
+Description: Implements a two-step estimator for multinomial logit models with 
+    sample selection bias. The package handles situations where outcomes are only 
+    observed for a non-random subset of the population, such as employment sector 
+    choice observed only for labor force participants. Includes multiplier bootstrap
+    for inference.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
+Imports: stats, numDeriv
+Suggests: MASS
