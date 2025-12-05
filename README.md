@@ -64,7 +64,4 @@ boot_result$vcov          # Variance-covariance matrix
 - Standard errors and confidence intervals
 - Comprehensive documentation
 
-## License
-
-MIT
 
