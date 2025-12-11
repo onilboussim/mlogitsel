@@ -9,7 +9,7 @@ Multinomial Logit Model with Sample Selection and Bootstrap Inference
 devtools::install("path/to/mlogitsel")
 
 # Or if on GitHub
-# devtools::install_github("username/mlogitsel")
+# devtools::install_github("onilboussim/mlogitsel")
 ```
 
 ## Usage
