@@ -2,20 +2,20 @@
 % Please edit documentation in R/mlogit_sel.R
 \name{Lambda2}
 \alias{Lambda2}
-\title{Lambda2 Function for Copula}
+\title{Lambda2 Function - Bivariate Normal Copula}
 \usage{
-Lambda2(u, v, omega)
+Lambda2(u, v, rho)
 }
 \arguments{
-\item{u}{First probability}
+\item{u}{First probability (must be in (0,1))}
 
-\item{v}{Second probability}
+\item{v}{Second probability (must be in (0,1))}
 
-\item{omega}{Dependence parameter}
+\item{rho}{Correlation parameter (must be in (-1,1))}
 }
 \value{
-Joint probability
+Joint probability from bivariate normal copula
 }
 \description{
-Computes the bivariate copula joint probability
+Computes the bivariate normal copula joint probability
 }

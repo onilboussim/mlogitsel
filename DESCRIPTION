@@ -7,12 +7,10 @@ Description: Implements a two-step estimator for multinomial logit models with
     sample selection bias. The package handles situations where outcomes are only 
     observed for a non-random subset of the population, such as employment sector 
     choice observed only for labor force participants. Includes multiplier bootstrap
-    for inference.
+    for inference. Uses bivariate normal copula for dependence structure.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
-Imports: stats, numDeriv
+Imports: stats, numDeriv, pbivnorm, copula
 Suggests: MASS
-URL: https://github.com/onilboussim/mlogitsel
-BugReports: https://github.com/onilboussim/mlogitsel/issues

@@ -1,14 +1,28 @@
-#' Lambda2 Function for Copula
+#' Lambda2 Function - Bivariate Normal Copula
 #'
-#' Computes the bivariate copula joint probability
+#' Computes the bivariate normal copula joint probability
 #'
-#' @param u First probability
-#' @param v Second probability
-#' @param omega Dependence parameter
-#' @return Joint probability
+#' @param u First probability (must be in (0,1))
+#' @param v Second probability (must be in (0,1))
+#' @param rho Correlation parameter (must be in (-1,1))
+#' @return Joint probability from bivariate normal copula
 #' @export
-Lambda2 <- function(u, v, omega) {
-  u * v + omega * sqrt(u * (1 - u) * v * (1 - v))
+Lambda2 <- function(u, v, rho) {
+  # Bound inputs to avoid numerical issues
+  u <- pmax(pmin(u, 1 - 1e-10), 1e-10)
+  v <- pmax(pmin(v, 1 - 1e-10), 1e-10)
+  rho <- pmin(pmax(rho, -0.999999), 0.999999)
+  
+  # Transform to standard normal quantiles
+  #u_inv <- qnorm(u)
+  #v_inv <- qnorm(v)
+  
+  # Bivariate normal CDF with correlation rho
+  # Using pbivnorm or approximation
+  normal_cop <- copula::normalCopula(param = rho, dim = 2)
+  bvn_cdf <- copula::pCopula(c(u, v), normal_cop)
+
+  return(bvn_cdf)
 }
 
 #' Multinomial Probabilities
@@ -105,9 +119,9 @@ mlogit_sel <- function(Y, S, X, Z,
   }
   
   # STEP 1: Selection equation
-  fit_sel <- glm(S ~ W - 1, family = binomial(link = "logit"))
-  delta_hat <- coef(fit_sel)
-  nu_hat <- fitted(fit_sel)  # P(S=1 | W)
+  fit_sel <- stats::glm(S ~ W - 1, family = stats::binomial(link = "logit"))
+  delta_hat <- stats::coef(fit_sel)
+  nu_hat <- stats::fitted(fit_sel)  # P(S=1 | W)
   
   # STEP 2: Outcome & dependence parameters — handle initial values
   num_beta_params <- (q - 1) * dx
@@ -186,7 +200,7 @@ mlogit_sel <- function(Y, S, X, Z,
       round(negloglik_step2(init_params, X, nu_hat, Y_mapped, S, q, dx), 2), 
       "\n", sep = "")
   
-  opt <- optim(
+  opt <- stats::optim(
     par = init_params,
     fn = negloglik_step2,
     X = X,
@@ -196,16 +210,16 @@ mlogit_sel <- function(Y, S, X, Z,
     q = q,
     dx = dx,
     method = "BFGS",
-    control = list(trace = 1, maxit = 8000, reltol = 1e-19)
+    control = list(trace = 1, maxit = 8000)
   )
   
   cat("\nStep 2 optimization completed.\n")
   cat("  - Convergence code:", opt$convergence, "\n")
   cat("  - Final negative log-likelihood:", round(opt$value, 4), "\n")
   if (opt$convergence == 0) {
-    cat("  - Status: Successful convergence \u2705\n")
+    cat("  - Status: Successful convergence\n")
   } else {
-    cat("  - Status: Warning \u2013 check convergence \u2757\n")
+    cat("  - Status: Warning - check convergence\n")
   }
   
   if (opt$convergence != 0) warning("Optimization may not have converged")
@@ -218,7 +232,7 @@ mlogit_sel <- function(Y, S, X, Z,
   beta_list <- split(beta_flat, rep(1:(q - 1), each = dx))
   gamma_list <- split(gamma_flat, rep(1:(q - 1), each = dx))
   
-  return(list(
+  result <- list(
     delta = delta_hat,
     beta = beta_list,
     gamma = gamma_list,
@@ -231,7 +245,10 @@ mlogit_sel <- function(Y, S, X, Z,
     X = X,
     S = S,
     dx = dx
-  ))
+  )
+  
+  class(result) <- c("mlogit_sel", "list")
+  return(result)
 }
 
 #' Multiplier Bootstrap for Multinomial Logit with Sample Selection
@@ -395,7 +412,7 @@ bootstrap_inference <- function(model_fit,
     }
     
     # Draw multipliers
-    G <- rnorm(n)
+    G <- stats::rnorm(n)
     
     # Compute perturbed score average
     s_bar_b <- colMeans(G * scores)
@@ -411,9 +428,9 @@ bootstrap_inference <- function(model_fit,
   
   alpha <- 1 - confidence_level
   
-  se <- apply(bootstrap_draws, 2, sd)
-  ci_lower <- apply(bootstrap_draws, 2, quantile, probs = alpha/2)
-  ci_upper <- apply(bootstrap_draws, 2, quantile, probs = 1 - alpha/2)
+  se <- apply(bootstrap_draws, 2, stats::sd)
+  ci_lower <- apply(bootstrap_draws, 2, stats::quantile, probs = alpha/2)
+  ci_upper <- apply(bootstrap_draws, 2, stats::quantile, probs = 1 - alpha/2)
   
   if (verbose) {
     cat("\n============================================================================\n")
@@ -440,7 +457,7 @@ bootstrap_inference <- function(model_fit,
     cat("\n")
   }
   
-  return(list(
+  result <- list(
     theta_hat = theta_hat,
     se = se,
     ci_lower = ci_lower,
@@ -450,24 +467,28 @@ bootstrap_inference <- function(model_fit,
     param_names = param_names,
     results_table = results_table,
     confidence_level = confidence_level
-  ))
+  )
+  
+  class(result) <- c("bootstrap_inference", "list")
+  return(result)
 }
 
 #' Summary Method for Bootstrap Inference
 #'
 #' Print a summary of bootstrap inference results
 #'
-#' @param bootstrap_result Output from bootstrap_inference function
+#' @param object Output from bootstrap_inference function
+#' @param ... Additional arguments (not used)
 #' @export
-summary.bootstrap_inference <- function(bootstrap_result) {
+summary.bootstrap_inference <- function(object, ...) {
   cat("\nBootstrap Inference Summary\n")
   cat("===========================\n\n")
-  cat("Confidence Level:", bootstrap_result$confidence_level * 100, "%\n")
-  cat("Number of Parameters:", length(bootstrap_result$theta_hat), "\n")
-  cat("Number of Bootstrap Draws:", nrow(bootstrap_result$bootstrap_draws), "\n\n")
+  cat("Confidence Level:", object$confidence_level * 100, "%\n")
+  cat("Number of Parameters:", length(object$theta_hat), "\n")
+  cat("Number of Bootstrap Draws:", nrow(object$bootstrap_draws), "\n\n")
   
-  print(bootstrap_result$results_table, row.names = FALSE, digits = 4)
+  print(object$results_table, row.names = FALSE, digits = 4)
   
-  invisible(bootstrap_result)
+  invisible(object)
 }
 

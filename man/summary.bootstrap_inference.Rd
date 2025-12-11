@@ -4,10 +4,12 @@
 \alias{summary.bootstrap_inference}
 \title{Summary Method for Bootstrap Inference}
 \usage{
-\method{summary}{bootstrap_inference}(bootstrap_result)
+\method{summary}{bootstrap_inference}(object, ...)
 }
 \arguments{
-\item{bootstrap_result}{Output from bootstrap_inference function}
+\item{object}{Output from bootstrap_inference function}
+
+\item{...}{Additional arguments (not used)}
 }
 \description{
 Print a summary of bootstrap inference results

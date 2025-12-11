@@ -2,8 +2,14 @@
 
 Multinomial Logit Model with Sample Selection and Bootstrap Inference
 
-## Installation on GitHub
-# devtools::install_github("onilboussim/mlogitsel")
+## Installation
+
+```r
+# Install from local source
+devtools::install("path/to/mlogitsel")
+
+# Or if on GitHub
+# devtools::install_github("username/mlogitsel")
 ```
 
 ## Usage
@@ -64,4 +70,7 @@ boot_result$vcov          # Variance-covariance matrix
 - Standard errors and confidence intervals
 - Comprehensive documentation
 
+## License
+
+MIT
 
